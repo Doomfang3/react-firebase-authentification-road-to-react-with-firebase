@@ -1,12 +1,17 @@
 import React, { Component } from "react";
 import { Link, withRouter } from "react-router-dom";
-import { compose } from 'recompose';
+import { compose } from "recompose";
+import { Helmet } from 'react-helmet';
 
 import { withFirebase } from "../Firebase";
 import * as ROUTES from "../../constants/routes";
 
 const SignUpPage = () => (
   <div>
+    <Helmet>
+      <title>Sign Up</title>
+      <meta name="signup page" content="signup" />
+    </Helmet>
     <h1>SignUp</h1>
     <SignUpForm />
   </div>
@@ -97,7 +102,10 @@ const SignUpLink = () => (
   </p>
 );
 
-const SignUpForm = compose(withRouter, withFirebase,)(SignUpFormBase);
+const SignUpForm = compose(
+  withRouter,
+  withFirebase
+)(SignUpFormBase);
 
 export default SignUpPage;
 export { SignUpForm, SignUpLink };

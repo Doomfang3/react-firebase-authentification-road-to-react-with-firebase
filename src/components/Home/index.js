@@ -1,9 +1,19 @@
 import React from "react";
+import { Helmet } from 'react-helmet';
 
-const Home = () => (
+import { withAuthorization } from "../Session";
+
+const HomePage = () => (
   <div>
+    <Helmet>
+      <title>Home</title>
+      <meta name="home page" content="home" />
+    </Helmet>
     <h1>Home</h1>
+    <p>The Home Page is accesible by avery signed in user.</p>
   </div>
 );
 
-export default Home;
+const condition = authUser => !!authUser;
+
+export default withAuthorization(condition)(HomePage);
