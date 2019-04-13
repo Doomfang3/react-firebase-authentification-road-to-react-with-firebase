@@ -1,0 +1,10 @@
+.users-list {
+  display: block;
+  background-color: #fff;
+}
+
+.users-list li {
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+}
