@@ -1,9 +1,12 @@
 import React, { Component } from "react";
+import { compose } from "recompose";
 import { Helmet } from "react-helmet";
 
 import { withFirebase } from "../Firebase";
+import { withAuthorization } from "../Session";
+import * as ROLES from "../../constants/roles";
 
-import './index.css';
+import "./index.css";
 
 class AdminPage extends Component {
   constructor(props) {
@@ -43,6 +46,7 @@ class AdminPage extends Component {
           <meta name="admin page" content="admin" />
         </Helmet>
         <h1>Admin</h1>
+        <p>The Admin Page is accessible by every signed in admin user.</p>
         {loading && <div>Loading ...</div>}
         <UserList users={users} />
       </div>
@@ -66,8 +70,20 @@ const UserList = ({ users }) => (
           <strong>Username: </strong>
           {user.username}
         </span>
+        {user.roles ? (
+          user.roles.includes(ROLES.ADMIN) ? (
+            <span>
+              <strong>Admin</strong>
+            </span>
+          ) : null
+        ) : null}
       </li>
     ))}
   </ul>
 );
-export default withFirebase(AdminPage);
+
+const condition = authUser => authUser && authUser.roles.includes(ROLES.ADMIN)
+
+export default compose(
+  withAuthorization(condition),
+  withFirebase)(AdminPage);
