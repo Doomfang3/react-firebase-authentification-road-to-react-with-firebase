@@ -8,6 +8,11 @@ import { PasswordForgetLink } from "../PasswordForget";
 import { withFirebase } from "../Firebase";
 import * as ROUTES from "../../constants/routes";
 
+const ERROR_CODE_ACCOUNT_EXISTS =
+  "auth/account-exists-with-different-credential";
+
+const ERROR_MSG_ACCOUNT_EXISTS = `An account with an E-Mail address already exists. Try login from this account instead and associate your social accounts on your personal account page.`;
+
 const SignInPage = () => (
   <div>
     <Helmet>
@@ -109,7 +114,9 @@ class SignInGoogleBase extends Component {
         this.props.history.push(ROUTES.HOME);
       })
       .catch(error => {
-        this.setState({ error });
+        if (error.code === ERROR_CODE_ACCOUNT_EXISTS) {
+          error.message = ERROR_MSG_ACCOUNT_EXISTS;
+        }
       });
   };
 
@@ -150,7 +157,9 @@ class SignInFacebookBase extends Component {
         this.props.history.push(ROUTES.HOME);
       })
       .catch(error => {
-        this.setState({ error });
+        if (error.code === ERROR_CODE_ACCOUNT_EXISTS) {
+          error.message = ERROR_MSG_ACCOUNT_EXISTS;
+        }
       });
   };
 
@@ -189,7 +198,9 @@ class SignInTwitterBase extends Component {
         this.props.history.push(ROUTES.HOME);
       })
       .catch(error => {
-        this.setState({ error });
+        if (error.code === ERROR_CODE_ACCOUNT_EXISTS) {
+          error.message = ERROR_MSG_ACCOUNT_EXISTS;
+        }
       });
   };
 
