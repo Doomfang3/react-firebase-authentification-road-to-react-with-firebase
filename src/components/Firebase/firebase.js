@@ -48,6 +48,11 @@ class Firebase {
 
   doSignInWithTwitter = () => this.auth.signInWithPopup(this.twitterProvider);
 
+  doSendEmailVerification = () =>
+    this.auth.currentUser.sendEmailVerification({
+      url: ENV_CONFIG.CONFIRMATION_EMAIL_REDIRECT
+    });
+
   //! *** Merge Auth and DB User API ***
 
   onAuthUserListener = (next, fallback) =>
@@ -65,6 +70,8 @@ class Firebase {
             authUser = {
               uid: authUser.uid,
               email: authUser.email,
+              emailVerified: authUser.emailVerified,
+              providedData: authUser.providerData,
               ...dbUser
             };
             next(authUser);
