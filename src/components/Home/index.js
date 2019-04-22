@@ -10,7 +10,7 @@ const HomePage = () => (
       <meta name="home page" content="home" />
     </Helmet>
     <h1>Home</h1>
-    <p>The Home Page is accesible by avery signed in user.</p>
+    <p>The Home Page is accesible by every signed in user.</p>
   </div>
 );
 
