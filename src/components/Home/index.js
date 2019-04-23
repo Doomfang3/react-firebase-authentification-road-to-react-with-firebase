@@ -11,18 +11,40 @@ import { withFirebase } from "../Firebase";
 
 import "./index.css";
 
-const HomePage = () => (
-  <div>
-    <Helmet>
-      <title>Home</title>
-      <meta name="home page" content="home" />
-    </Helmet>
-    <h1>Home</h1>
-    <p>The Home Page is accesible by every signed in user.</p>
+class HomePage extends Component {
+  constructor(props) {
+    super(props);
+    this.state = {
+      users: null
+    };
+  }
 
-    <Messages />
-  </div>
-);
+  componentDidMount() {
+    this.props.firebase.users().on("value", snapshot => {
+      this.setState({
+        users: snapshot.val()
+      });
+    });
+  }
+
+  componentWillUnmount() {
+    this.props.firebase.users().off();
+  }
+
+  render() {
+    return (
+      <div>
+        <Helmet>
+          <title>Home</title>
+          <meta name="home page" content="home" />
+        </Helmet>
+        <h1>Home</h1>
+        <p>The Home Page is accesible by every signed in user.</p>
+        <Messages users={this.state.users} />
+      </div>
+    );
+  }
+}
 
 class MessagesBase extends Component {
   constructor(props) {
@@ -30,29 +52,45 @@ class MessagesBase extends Component {
     this.state = {
       text: "",
       loading: false,
-      messages: []
+      messages: [],
+      limit: 5
     };
   }
 
   componentDidMount() {
-    this.setState({ loading: true });
-    this.props.firebase.messages().on("value", snapshot => {
-      const messageObject = snapshot.val();
-      if (messageObject) {
-        const messageList = Object.keys(messageObject).map(key => ({
-          ...messageObject[key],
-          uid: key
-        }));
-        this.setState({ messages: messageList, loading: false });
-      } else {
-        this.setState({ messages: null, loading: false });
-      }
-    });
+    this.onListenForMessages();
   }
 
   componentWillUnmount() {
     this.props.firebase.messages().off();
   }
+
+  onListenForMessages = () => {
+    this.setState({ loading: true });
+    this.props.firebase
+      .messages()
+      .orderByChild("createdAt")
+      .limitToLast(this.state.limit)
+      .on("value", snapshot => {
+        const messageObject = snapshot.val();
+        if (messageObject) {
+          const messageList = Object.keys(messageObject).map(key => ({
+            ...messageObject[key],
+            uid: key
+          }));
+          this.setState({ messages: messageList, loading: false });
+        } else {
+          this.setState({ messages: null, loading: false });
+        }
+      });
+  };
+
+  onNextPage = () => {
+    this.setState(
+      state => ({ limit: state.limit + 5 }),
+      this.onListenForMessages
+    );
+  };
 
   onChangeText = event => {
     this.setState({ text: event.target.value });
@@ -81,16 +119,26 @@ class MessagesBase extends Component {
   };
 
   render() {
+    const { users } = this.props;
     const { text, messages, loading } = this.state;
-
     return (
       <AuthUserContext.Consumer>
         {authUser => (
           <div>
+            {!loading && messages && (
+              <button type="button" onClick={this.onNextPage}>
+                More
+              </button>
+            )}
             {loading && <div>Loading...</div>}
             {messages ? (
               <MessageList
-                messages={messages}
+                messages={messages.map(message => ({
+                  ...message,
+                  user: users
+                    ? users[message.userId]
+                    : { userId: message.userId }
+                }))}
                 onEditMessage={this.onEditMessage}
                 onRemoveMessage={this.onRemoveMessage}
               />
@@ -149,7 +197,6 @@ class MessageItem extends Component {
   render() {
     const { message, onRemoveMessage } = this.props;
     const { editMode, editText } = this.state;
-
     return (
       <li>
         {editMode ? (
@@ -160,7 +207,9 @@ class MessageItem extends Component {
           />
         ) : (
           <span>
-            <strong>{message.userId}</strong> {`${message.text} `}{message.editedAt && <span>(Edited)</span>}
+            <strong>{message.user.username || message.user.userId}</strong>{" "}
+            {`${message.text} `}
+            {message.editedAt && <span> (Edited) </span>}
           </span>
         )}
         {editMode ? (
@@ -186,6 +235,7 @@ const Messages = withFirebase(MessagesBase);
 const condition = authUser => !!authUser;
 
 export default compose(
+  withFirebase,
   withEmailVerification,
   withAuthorization(condition)
 )(HomePage);
