@@ -1,0 +1,14 @@
+.messages {
+  padding: 2em;
+  background-color: inherit;
+  list-style: none;
+  display: block;
+}
+
+.messages li {
+  padding: 1em;
+}
+
+.messages li strong::after {
+  content: " : ";
+}

@@ -17,6 +17,9 @@ class Firebase {
   constructor() {
     app.initializeApp(config);
 
+    //* Helper
+    this.serverValue = app.database.ServerValue;
+
     this.emailAuthProvider = app.auth.EmailAuthProvider;
     this.auth = app.auth();
     this.db = app.database();
@@ -86,6 +89,12 @@ class Firebase {
   user = uid => this.db.ref(`users/${uid}`);
 
   users = () => this.db.ref("users");
+
+  //! *** Message API ***
+
+  message = uid => this.db.ref(`messages/${uid}`);
+
+  messages = () => this.db.ref("messages")
 }
 
 export default Firebase;
