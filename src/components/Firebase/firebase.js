@@ -71,7 +71,7 @@ class Firebase {
               uid: authUser.uid,
               email: authUser.email,
               emailVerified: authUser.emailVerified,
-              providedData: authUser.providerData,
+              providerData: authUser.providerData,
               ...dbUser
             };
             next(authUser);
